@@ -1,0 +1,20 @@
+# Terraform state and secrets — NEVER commit
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/.terraform/
+infra/terraform.tfvars
+
+# Terraform lock file (optional: remove if you want to track it)
+# infra/.terraform.lock.hcl
+
+# Environment variables
+.env
+*.env
+.env.*
+
+# Worktrees
+.worktrees
+.worktrees/
+
+# OS
+.DS_Store

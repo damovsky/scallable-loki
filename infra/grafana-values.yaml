@@ -1,0 +1,36 @@
+# Grafana Production Values
+# This file automates the UI configuration and Loki integration.
+
+# Use a Kubernetes secret instead of a plaintext password.
+# Create it before helm install:
+#   kubectl create secret generic grafana-admin-secret \
+#     --namespace logging \
+#     --from-literal=admin-password='<your-secure-password>'
+admin:
+  existingSecret: grafana-admin-secret
+  userKey: admin-user
+  passwordKey: admin-password
+
+persistence:
+  enabled: true
+  storageClassName: gp3
+  size: 10Gi
+
+service:
+  type: ClusterIP
+
+# Automated Data Source Provisioning (Configuration as Code)
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Loki
+        type: loki
+        url: http://loki-gateway.logging.svc.cluster.local
+        access: proxy
+        isDefault: true
+        jsonData:
+          # Required for Loki 6.x multi-tenancy mode
+          extraHttpHeaders:
+            # Set to your actual org ID ("default" for single-tenant Loki).
+            X-Scope-OrgID: "default"

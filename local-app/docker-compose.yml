@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Simple Python application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - app-logs:/tmp
+    networks:
+      - logging
+
+  # Fluent Bit as sidecar/log aggregator
+  fluent-bit:
+    image: fluent/fluent-bit:3.3.6
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+      - app-logs:/tmp
+    environment:
+      # This would be the address of your Loki in AWS
+      - LOKI_HOST=${LOKI_HOST:-localhost}
+    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
+    depends_on:
+      - app
+    networks:
+      - logging
+
+volumes:
+  app-logs:
+
+networks:
+  logging:

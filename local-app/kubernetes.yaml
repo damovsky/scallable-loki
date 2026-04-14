@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: poc-app
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: poc-app
+  template:
+    metadata:
+      labels:
+        app: poc-app
+    spec:
+      # Pod-level security: drop all capabilities, run as non-root
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      containers:
+      # 1. The Application
+      - name: app
+        # Replace <AWS_ACCOUNT_ID> and <AWS_REGION> with your values, or use
+        # envsubst / kustomize / helm to inject them at deploy time.
+        image: <AWS_ACCOUNT_ID>.dkr.ecr.<AWS_REGION>.amazonaws.com/poc-app:v1
+        imagePullPolicy: Always
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: false  # app writes to /tmp/app.log
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            cpu: "50m"
+            memory: "64Mi"
+          limits:
+            cpu: "200m"
+            memory: "128Mi"
+        volumeMounts:
+        - name: logs
+          mountPath: /tmp
+
+      # 2. Fluent Bit Sidecar (The Shipper)
+      - name: fluent-bit
+        image: fluent/fluent-bit:3.3.6
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          requests:
+            cpu: "25m"
+            memory: "32Mi"
+          limits:
+            cpu: "100m"
+            memory: "64Mi"
+        volumeMounts:
+        - name: logs
+          mountPath: /tmp
+        - name: config
+          mountPath: /fluent-bit/etc/
+        env:
+        - name: LOKI_HOST
+          value: "loki-gateway.logging.svc.cluster.local"
+
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: config
+        configMap:
+          name: fluent-bit-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluent-bit-config
+data:
+  fluent-bit.conf: |
+    [SERVICE]
+        Flush        1
+        Daemon       off
+    [INPUT]
+        Name         tail
+        Path         /tmp/app.log
+    [OUTPUT]
+        Name         loki
+        Match        *
+        Host         ${LOKI_HOST}
+        Port         3100
+        Labels       job=fluent-bit, app=poc-app, env=production
+        Line_Format  json
