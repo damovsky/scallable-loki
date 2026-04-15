@@ -1,8 +1,8 @@
 # Terraform state and secrets — NEVER commit
-infra/terraform.tfstate
-infra/terraform.tfstate.backup
-infra/.terraform/
-infra/terraform.tfvars
+infra/terraform/terraform.tfstate
+infra/terraform/terraform.tfstate.backup
+infra/terraform/.terraform/
+infra/terraform/terraform.tfvars
 
 # Terraform lock file (optional: remove if you want to track it)
 # infra/.terraform.lock.hcl

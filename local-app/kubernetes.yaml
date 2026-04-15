@@ -90,6 +90,6 @@ data:
         Name         loki
         Match        *
         Host         ${LOKI_HOST}
-        Port         3100
+        Port         80
         Labels       job=fluent-bit, app=poc-app, env=production
-        Line_Format  json
+        Line_Format  key_value

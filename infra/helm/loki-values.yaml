@@ -1,8 +1,19 @@
 deploymentMode: SimpleScalable
 
+lokiCanary:
+  enabled: false
+
+test:
+  enabled: false
+
 loki:
+  auth_enabled: false
+
   commonConfig:
     replication_factor: 3
+
+  limits_config:
+    volume_enabled: true
 
   storage:
     type: s3
