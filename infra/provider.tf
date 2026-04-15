@@ -1,8 +1,5 @@
-# Set provider to eu-central-1 and use the specified SSO profile
-
 provider "aws" {
-  region  = var.aws_region
-  profile = var.aws_profile
+  region = var.aws_region
 }
 
 terraform {
@@ -25,7 +22,6 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    # This ensures Terraform can talk to the cluster using the Admin Role
-    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--profile", var.aws_profile, "--role-arn", var.admin_sso_role_arn]
+    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--role-arn", aws_iam_role.eks_admin_role.arn]
   }
 }

@@ -1,14 +1,6 @@
 # Copy this file to terraform.tfvars and fill in your values.
 # terraform.tfvars is gitignored — never commit it.
 
-# Your AWS CLI profile name (from ~/.aws/config)
-aws_profile = "your-sso-profile-name"
-
-# The specific SSO/IAM role ARN allowed to assume LokiEKSAdminRole.
-# Find it in IAM → Roles → your SSO role.
-# Example: "arn:aws:iam::123456789012:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_xxxx"
-admin_sso_role_arn = "arn:aws:iam::ACCOUNT_ID:role/YOUR_SSO_ROLE_NAME"
-
 # CIDRs allowed to reach the EKS public API endpoint.
 # Restrict to your known IP(s) in production.
 # Example: ["203.0.113.42/32"]

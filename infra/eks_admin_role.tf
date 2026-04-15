@@ -1,6 +1,4 @@
 # Dedicated IAM Role for EKS Cluster Administration
-# This follows the principle of Least Privilege by separating the SSO identity from Cluster Admin rights.
-
 resource "aws_iam_role" "eks_admin_role" {
   name = "LokiEKSAdminRole"
 
@@ -11,9 +9,7 @@ resource "aws_iam_role" "eks_admin_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          # Restrict to a specific SSO role, not the entire account root.
-          # Set var.admin_sso_role_arn in terraform.tfvars or via TF_VAR_admin_sso_role_arn.
-          AWS = var.admin_sso_role_arn
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
         }
       }
     ]
